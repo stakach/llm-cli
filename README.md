@@ -6,6 +6,8 @@ Need to Google that command you can't quite remember? Use a Large Language Model
 * Just describe what you want to do and the LLM will generate the commands for you.
 * You can be vague, you will be prompted for parameter details (file and folder names, branches, commit messages etc)
 
+<img width="621" alt="example" src="https://user-images.githubusercontent.com/368013/232493882-6bb8b4f8-6988-41f1-9f25-a1685e0c1750.png">
+
 ## Installation
 
 Make sure you have [crystal lang](https://crystal-lang.org/install/) installed to build the project
