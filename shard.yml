@@ -1,0 +1,15 @@
+name: llm-cli
+version: 1.0.0
+
+authors:
+  - Stephen von Takach <steve@place.tech>
+
+targets:
+  llm:
+    main: src/llm-cli.cr
+
+dependencies:
+  spinner:
+    github: askn/spinner
+
+license: MIT
