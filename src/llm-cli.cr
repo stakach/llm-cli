@@ -18,9 +18,11 @@ rescue error : LLM::CLI::Chat::Error
 end
 shell = LLM::CLI::Shell.new
 prompt = LLM::CLI::Prompt.new({
-  "No user assistance",
+  "No user assistance, command ordering is important",
+  "You are running on #{shell.operating_system}",
   "Commands to be executed on the following shell: #{File.basename shell.selected}",
   "Wrap unknown command parameters in <brackets>",
+  "you might need to change directory before executing subsequent commands",
 })
 
 # grab the users request
@@ -99,6 +101,21 @@ begin
           error: :inherit
         ).wait
         puts "Command failed with exit code: #{status.exit_code}" unless status.success?
+
+        # change directory as required
+        if execute.starts_with?("cd ") || execute.includes?("&& cd ")
+          args = Process.parse_arguments(execute)
+          found = nil
+          args.each_with_index do |cmd, index|
+            if cmd == "cd"
+              found = index + 1
+              break
+            end
+          end
+          if found && (new_dir = args[found]?)
+            Dir.cd(new_dir)
+          end
+        end
       end
     end
   rescue error

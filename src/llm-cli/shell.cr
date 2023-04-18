@@ -22,6 +22,24 @@ class LLM::CLI::Shell
     shell
   end
 
+  {% begin %}
+    def operating_system
+      {% if flag?(:win32) %}
+        "windows"
+      {% elsif flag?(:darwin) %}
+        "macOS"
+      {% elsif flag?(:musl) %}
+        "musl linux"
+      {% elsif flag?(:linux) %}
+        "linux"
+      {% elsif flag?(:bsd) %}
+        "bsd"
+      {% else %}
+        "posix"
+      {% end %}
+    end
+  {% end %}
+
   def get_input(prompt)
     print prompt
     STDIN.gets.to_s.chomp

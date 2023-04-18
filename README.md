@@ -6,7 +6,7 @@ Need to Google that command you can't quite remember? Use a Large Language Model
 * Just describe what you want to do and the LLM will generate the commands for you.
 * You can be vague, you will be prompted for parameter details (file and folder names, branches, commit messages etc)
 
-<img width="621" alt="example" src="https://user-images.githubusercontent.com/368013/232493882-6bb8b4f8-6988-41f1-9f25-a1685e0c1750.png">
+<img width="623" alt="example" src="https://user-images.githubusercontent.com/368013/232639264-cd136de1-a1cd-4e32-ba39-ee860793d9de.png">
 
 ## Installation
 
