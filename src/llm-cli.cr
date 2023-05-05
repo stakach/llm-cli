@@ -1,8 +1,37 @@
 require "spinner"
 require "colorize"
 require "./llm-cli/*"
+require "option_parser"
+
+# check for any runtime flags
+args = ARGV.dup
+verbose = false
+is_query = false
+model = ENV["LLM_MODEL"]? || ""
+
+# Command line options
+OptionParser.parse(args) do |parser|
+  parser.on("-m MODEL", "--model=MODEL", "specify a LLM model to use") do |llm_model|
+    model = llm_model
+  end
+
+  parser.on("-q", "--query", "Just ask a question of the LLM and return the response") do
+    is_query = true
+  end
+
+  parser.on("-v", "--verbose", "Output all the request and response data") do
+    verbose = true
+  end
+
+  parser.on("-h", "--help", "Show this help") do
+    puts parser
+    exit 0
+  end
+end
 
 # init the service
+shell = LLM::CLI::Shell.new
+spin = Spin.new
 chat = begin
   LLM::CLI::Chat.service
 rescue error : LLM::CLI::Chat::Error
@@ -16,29 +45,60 @@ rescue error : LLM::CLI::Chat::Error
   end
   exit 1
 end
-shell = LLM::CLI::Shell.new
+
+chat.model_preference = model
+puts "> Model Selected: #{chat.model_id}".colorize(:red) if verbose
+
+# we want to ask some questions via the command line
+if is_query && (question = args.join("").presence)
+  begin
+    messages = [LLM::CLI::Chat::Message.new(LLM::CLI::Chat::Role::User, question)]
+    loop do
+      spin.start
+      response = chat.chat messages
+      messages << response
+      spin.stop
+
+      puts "\n#{response.content}\n".colorize(:green)
+
+      question = shell.get_input("reply? ").strip
+      exit 0 unless question.presence
+      messages << LLM::CLI::Chat::Message.new(LLM::CLI::Chat::Role::User, question)
+    end
+  rescue error
+    spin.stop
+    puts error.inspect_with_backtrace.colorize(:red)
+    exit 2
+  end
+end
+
 prompt = LLM::CLI::Prompt.new({
   "No user assistance, command ordering is important",
   "You are running on #{shell.operating_system}",
-  "Commands to be executed on the following shell: #{File.basename shell.selected}",
+  "The current shell is: #{File.basename shell.selected}",
   "Wrap unknown command parameters in <brackets>",
   "you might need to change directory before executing subsequent commands",
+  "a single command might solve multiple goals, be creative",
 })
 
 # grab the users request
-request = ARGV.dup.join(" ").presence
+request = args.join(" ").presence
 unless request
   puts "No command description provided".colorize(:red)
   exit 1
 end
 prompt.add_goal request
 
-spin = Spin.new
+prompt_message = prompt.generate
+puts "> Requesting:\n#{prompt_message}\n".colorize(:red) if verbose
+
 begin
   spin.start
   # query the configured LLM
-  response = chat.send prompt.generate
+  response = chat.send prompt_message
   spin.stop
+
+  puts "> Raw response:\n#{response}\n".colorize(:red) if verbose
 
   # process the response
   begin

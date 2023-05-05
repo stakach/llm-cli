@@ -24,7 +24,10 @@ You'll then need to configure a LLM, currently only OpenAPI is implemented. You 
 ```shell
 vi ~/.bashrc
 # then add your OpenAPI Key
-# export OPENAI_API_KEY=sk-123456
+export OPENAI_API_KEY=sk-123456
+
+# optionally you can specify your preferred model
+export LLM_MODEL=gpt-3.5-turbo
 ```
 
 ## Usage
@@ -36,6 +39,16 @@ llm the description of the command you want to run
 # .. 
 llm I want to do this then do this. Then do this
 ```
+
+Execute a query and have the response returned on the command line
+
+```shell
+llm -q are there any warm blooded reptiles?
+```
+
+you can specify your model preference using `-m gpt-3.5-turbo` (as will default to `gpt-4` if you have API access to it)
+
+If you would like to verbose details use the `-v` flag
 
 ## Contributing
 

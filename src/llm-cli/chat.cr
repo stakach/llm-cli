@@ -28,6 +28,9 @@ abstract class LLM::CLI::Chat
     help: String)
 
   abstract def chat(message : Array(Message)) : Message
+  abstract def model_id : String
+
+  property model_preference : String = ""
 
   def send(message : String) : String
     chat([Message.new(:user, message)]).content

@@ -42,10 +42,12 @@ class LLM::CLI::OpenAI::GPT < LLM::CLI::Chat
   getter model_id : String do
     response = client.get("/v1/models")
     models = List(Model).from_json(response.body).data.map(&.id)
-    preferred = {"gpt-4", "gpt-3.5-turbo"}
+    preferred = {model_preference, "gpt-4", "gpt-3.5-turbo"}
 
     found = preferred.last
     preferred.each do |model|
+      next unless model.presence
+
       if models.includes?(model)
         found = model
         break
